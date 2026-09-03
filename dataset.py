@@ -309,7 +309,8 @@ class StreamingTTSDataset(_TTSDataMixin, IterableDataset):
             if merges_possible is None:
                 merges_possible = "merged" in row
 
-
+            # only merged datasets need the by-key latent cache; caching
+            # unconditionally would hold the whole stream in memory
             if merges_possible:
                 key = row.get("key", None)
                 if key is not None:
@@ -347,7 +348,6 @@ class StreamingTTSDataset(_TTSDataMixin, IterableDataset):
 
 class TTSCollator:
     MIN_AUDIO_SAMPLES = 16000
-    DEFAULT_BUCKETS = (125, 250, 376)
 
     def __init__(
         self,
@@ -356,50 +356,12 @@ class TTSCollator:
         text_pad_id,
         latent_dim,
         load_audio=False,
-        latent_length_buckets=None,
-        latent_pad_value=0.0,
     ):
         self.max_text_len = max_text_len
         self.max_latent_len = int(max_latent_len)
         self.text_pad_id = text_pad_id
         self.latent_dim = latent_dim
         self.load_audio = load_audio
-        self.latent_pad_value = float(latent_pad_value)
-
-        raw = self.DEFAULT_BUCKETS if latent_length_buckets is None else latent_length_buckets
-        buckets = sorted({int(b) for b in raw if int(b) > 0})
-        if not buckets:
-            raise ValueError("latent_length_buckets must contain at least one positive bucket")
-        if buckets[-1] != self.max_latent_len:
-            raise ValueError(
-                f"largest bucket must equal max_latent_len: "
-                f"buckets={buckets}, max_latent_len={self.max_latent_len}"
-            )
-        self.latent_length_buckets = buckets
-
-    def _select_bucket(self, speech_length):
-        speech_length = int(speech_length)
-        if speech_length <= 0:
-            raise ValueError(f"speech latent must contain at least one frame, got {speech_length}")
-        first = next(
-            (i for i, b in enumerate(self.latent_length_buckets) if b >= speech_length), None
-        )
-        if first is None:
-            raise ValueError(
-                f"speech is too long for available buckets without truncation: "
-                f"speech={speech_length}, buckets={self.latent_length_buckets}"
-            )
-
-        eligible = self.latent_length_buckets[first:]
-        if len(eligible) == 1:
-            return eligible[0]
-
-        r = float(torch.rand(()).item())
-        if len(eligible) == 3:
-            return eligible[0] if r < 0.60 else (eligible[1] if r < 0.85 else eligible[2])
-        if len(eligible) == 2:
-            return eligible[0] if r < 0.75 else eligible[1]
-        return eligible[int(torch.randint(0, len(eligible), (1,)).item())]
 
     def _load_audio_ref(self, audio_path):
         import librosa
@@ -432,7 +394,7 @@ class TTSCollator:
     def _safe_load_audio(self, audio_path):
         if audio_path is None:
             return None
-
+        # a corrupt clip drops to a zero placeholder rather than killing the run
         try:
             wav = self._load_audio_ref(audio_path)
         except Exception:
@@ -467,23 +429,20 @@ class TTSCollator:
             text_ids[i, :L] = ids[:L]
             text_mask[i, :L] = attn[:L]
 
-        # the selected bucket is the full speech+silence canvas; speech is never
-        # clipped and leftover room becomes codec silence
+        # padding past each sample's true length is masked out of the loss
         speech_lengths = [int(lat.shape[0]) for lat in latent_list]
-        sample_buckets = [self._select_bucket(length) for length in speech_lengths]
-        batch_pad_len = max(sample_buckets)
+        batch_pad_len = max(speech_lengths)
+        if batch_pad_len > self.max_latent_len:
+            raise ValueError(
+                f"speech longer than max_latent_len: "
+                f"frames={batch_pad_len}, max_latent_len={self.max_latent_len}"
+            )
 
-        latents = torch.full(
-            (B, batch_pad_len, self.latent_dim), self.latent_pad_value, dtype=torch.float32
-        )
-        speech_mask = torch.zeros(B, batch_pad_len, dtype=torch.bool)
+        latents = torch.zeros(B, batch_pad_len, self.latent_dim, dtype=torch.float32)
         latent_mask = torch.zeros(B, batch_pad_len, dtype=torch.bool)
-        for i, (lat, speech_len, bucket_len) in enumerate(
-            zip(latent_list, speech_lengths, sample_buckets)
-        ):
+        for i, (lat, speech_len) in enumerate(zip(latent_list, speech_lengths)):
             latents[i, :speech_len] = lat.float()
-            speech_mask[i, :speech_len] = True
-            latent_mask[i, :bucket_len] = True
+            latent_mask[i, :speech_len] = True
 
         out = {
             "text_ids": text_ids,
@@ -491,9 +450,7 @@ class TTSCollator:
             "texts": list(raw_texts),
             "latents": latents,
             "latent_mask": latent_mask,
-            "speech_mask": speech_mask,
             "speech_lengths": torch.tensor(speech_lengths, dtype=torch.long),
-            "bucket_lengths": torch.tensor(sample_buckets, dtype=torch.long),
         }
 
         if self.load_audio:
@@ -586,8 +543,6 @@ def build_tts_dataloader(
     tokenizer=None,
     streaming=False,
     dataset_split="train",
-    buckets=None,
-    pad_value=0.0,
 ):
     tokenizer = _load_tokenizer(tokenizer)
     max_speech_frames = int(max_latent_len)
@@ -630,8 +585,6 @@ def build_tts_dataloader(
         text_pad_id=text_pad_id,
         latent_dim=latent_dim,
         load_audio=need_audio,
-        latent_length_buckets=buckets or train_cfg.get("latent_length_buckets"),
-        latent_pad_value=pad_value,
     )
 
     num_workers = train_cfg.get("num_workers", 0 if streaming else 12)
