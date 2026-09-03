@@ -1,0 +1,71 @@
+{
+  "version": "DaryaTitaNetDiT",
+  "model": {
+    "latent_size": 52,
+    "norm_eps": 1e-6,
+    "decoder": {
+      "model_size": 1280,
+      "num_layers": 20,
+      "num_heads": 16,
+      "intermediate_size": 5120
+    },
+
+  "text_encoder": {
+    "kind": "scratch",
+
+    "vocab_size": 3333,
+    "pad_token_id": 1,
+
+    "pretrained_name": "jhu-clsp/mmBERT-base",
+    "use_custom_tokenizer": true,
+    "init_noise_std": 0.02,
+
+    "model_size": 1024,
+    "num_layers": 12,
+    "num_heads": 16,
+    "intermediate_size": 4096,
+    "max_position_embeddings": 2048
+  },
+
+    "reference_projector": {
+      "latent_dim": 52
+    },
+
+    "conditioning": {
+      "timestep_embed_size": 512,
+      "adaln_rank": 256
+    }
+  },
+
+  "data": {
+    "sample_rate": 44100,
+    "codec_rate_hz": 12.5,
+    "latent_dim": 52,
+    "max_audio_seconds": 30,
+    "max_latent_length": 376,
+    "max_text_length": 512,
+    "text_pad_id": 1
+  },
+  
+  "training": {
+
+    "dtype": "float32",
+    "compile": true,
+    "batch_size": 112,
+    "grad_accum_steps": 4,
+    "lr": 5e-5,
+    "weight_decay": 0.0,
+    "betas": [0.9, 0.999],
+    "warmup_steps": 0,
+    "max_steps": 100000,
+    "grad_clip": 1.0,
+    "ema_decay": 0.9999,
+    "log_every": 100,
+    "save_every": 5000,
+    "keep_last_k": 5,
+    "text_cond_drop_prob": 0.1,
+    "speaker_cond_drop_prob": 0.1,
+    "use_checkpoint": false,
+    "seed": 42
+  }
+}
