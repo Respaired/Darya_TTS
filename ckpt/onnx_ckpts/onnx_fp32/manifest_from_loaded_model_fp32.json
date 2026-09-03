@@ -1,0 +1,25 @@
+{
+  "decoder_path": "/home/ubuntu/zs_cleaning/darya-tts/ONNX/onnx_fp32/tts_decoder_denoiser_fp32.onnx",
+  "device": "cpu",
+  "dtype": "torch.float32",
+  "dummy_audio_len": 192,
+  "dummy_batch": 1,
+  "dummy_text_len": 86,
+  "encoder_path": "/home/ubuntu/zs_cleaning/darya-tts/ONNX/onnx_fp32/tts_encoder_fp32.onnx",
+  "exporter": "dynamo",
+  "kind": "core_from_loaded_model",
+  "onnx_checker": [
+    {
+      "name": "encoder_checker",
+      "ok": true
+    },
+    {
+      "name": "decoder_checker",
+      "ok": true
+    }
+  ],
+  "opset": 18,
+  "precision": "fp32",
+  "source": "already_loaded_model_object",
+  "use_speaker_conditioning": false
+}
