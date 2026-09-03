@@ -1,5 +1,4 @@
 import argparse
-import json
 import logging
 import math
 import os
@@ -17,7 +16,11 @@ from accelerate.utils import set_seed
 from transformers import get_cosine_schedule_with_warmup
 from torchao.float8 import Float8LinearConfig, convert_to_float8_training
 
-from dataset import build_multi_tts_dataloader, build_tts_dataloader, extract_speaker_embs_from_batch, load_titanet
+from dataset import (
+    build_tts_dataloader,
+    extract_speaker_embs_from_batch,
+    load_titanet,
+)
 from discriminator import ConformerDiscirminator
 from model_transformer import load_config, model_from_config
 
@@ -53,6 +56,8 @@ def module_filter_fn(mod, fqn):
     if mod.in_features < 256 or mod.out_features < 256:
         return False
     if fqn in FP8_SKIP_EXACT or fqn.startswith(FP8_SKIP_PREFIXES):
+        return False
+    if ".mamba." in fqn:
         return False
     return True
 
@@ -137,7 +142,12 @@ def extract_disc_features(
     disc_t=None,
     disc_noise=None,
 ):
+    """Stack hidden states from the score net as discriminator input.
 
+    When disc_t/disc_noise are given the latents are noised to that level
+    first, so the discriminator sees noisy representations instead of
+    requiring ODE-sampled sequences.
+    """
     max_len = int(latent_lengths.max().item())
     latents = latents[:, :max_len, :]
     valid_mask = torch.arange(max_len, device=latents.device)[None, :] < latent_lengths[:, None]
@@ -243,10 +253,12 @@ def compute_loss(
     cond = cond * valid_audio_mask.unsqueeze(-1).to(cond.dtype)
     model_input = x_t * valid_audio_mask.unsqueeze(-1).to(x_t.dtype)
 
-
+    # Mutually exclusive CFG drop buckets. Marginals:
+    #   P(text dropped)    = p_drop_both + p_drop_text
+    #   P(speaker dropped) = p_drop_both + p_drop_speaker
     p_drop_both = 0.1
     p_drop_text = 0.1
-    p_drop_speaker = 0.0  # legacy, don't mind it 
+    p_drop_speaker = 0.0  # raise in stage 2
 
     r = torch.rand(B, device=device)
     b0 = p_drop_both
@@ -296,7 +308,7 @@ def compute_loss(
         stats = {"fm_loss": fm_loss.detach(), "gen_adv_loss": zero, "speaker_aux_loss": zero}
         return fm_loss, stats, None
 
-    
+    # --- speaker auxiliary prediction ---
     raw = unwrap_model(model)
     speaker_aux_loss = zero
     if need_hidden and hasattr(raw, "predict_speaker"):
@@ -441,9 +453,7 @@ def cleanup_checkpoints(exp_dir, keep_last_k):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, required=True)
-    dataset_group = parser.add_mutually_exclusive_group(required=True)
-    dataset_group.add_argument("--dataset", type=str)
-    dataset_group.add_argument("--datasets", type=str)
+    parser.add_argument("--dataset", type=str, required=True)
     parser.add_argument("--streaming", action="store_true")
     parser.add_argument("--dataset_split", type=str, default="train")
     parser.add_argument("--tokenizer", type=str, default=None)
@@ -511,43 +521,26 @@ def build_optimizer(args, model, train_cfg):
 
 def build_data(args, cfg, need_audio):
     data_cfg = cfg["data"]
-    train_cfg = cfg["training"]
-
     raw_max = data_cfg["max_audio_seconds"] * data_cfg["codec_rate_hz"]
-    common = dict(
+
+    logger.info(f"Loading dataset from {args.dataset}")
+    return build_tts_dataloader(
+        dataset_path=args.dataset,
         latent_dim=data_cfg["latent_dim"],
         need_audio=need_audio,
         max_text_len=data_cfg["max_text_length"],
         max_latent_len=int(data_cfg.get("max_latent_length", int(raw_max))),
         text_pad_id=data_cfg["text_pad_id"],
-        train_cfg=train_cfg,
+        train_cfg=cfg["training"],
         tokenizer=(
             args.tokenizer
             or data_cfg.get("tokenizer")
             or data_cfg.get("tokenizer_name")
             or data_cfg.get("text_tokenizer")
         ),
+        streaming=args.streaming,
+        dataset_split=args.dataset_split,
     )
-
-    if args.datasets is None:
-        logger.info(f"Loading dataset from {args.dataset}")
-        return build_tts_dataloader(
-            dataset_path=args.dataset,
-            streaming=args.streaming,
-            dataset_split=args.dataset_split,
-            **common,
-        )
-
-    if args.streaming:
-        raise ValueError("--streaming is not supported with --datasets")
-
-    with open(args.datasets, "r", encoding="utf-8") as f:
-        dataset_configs = json.load(f).get("datasets")
-    if not isinstance(dataset_configs, list) or not dataset_configs:
-        raise ValueError("--datasets JSON must contain a non-empty top-level 'datasets' list")
-
-    logger.info(f"Loading {len(dataset_configs)} configured datasets from {args.datasets}")
-    return build_multi_tts_dataloader(dataset_configs=dataset_configs, **common)
 
 
 def main():
