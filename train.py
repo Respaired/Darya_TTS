@@ -243,12 +243,10 @@ def compute_loss(
     cond = cond * valid_audio_mask.unsqueeze(-1).to(cond.dtype)
     model_input = x_t * valid_audio_mask.unsqueeze(-1).to(x_t.dtype)
 
-    # Mutually exclusive CFG drop buckets. Marginals:
-    #   P(text dropped)    = p_drop_both + p_drop_text
-    #   P(speaker dropped) = p_drop_both + p_drop_speaker
+
     p_drop_both = 0.1
     p_drop_text = 0.1
-    p_drop_speaker = 0.0  # raise in stage 2
+    p_drop_speaker = 0.0  # legacy, don't mind it 
 
     r = torch.rand(B, device=device)
     b0 = p_drop_both
@@ -298,7 +296,7 @@ def compute_loss(
         stats = {"fm_loss": fm_loss.detach(), "gen_adv_loss": zero, "speaker_aux_loss": zero}
         return fm_loss, stats, None
 
-    # --- speaker auxiliary prediction ---
+    
     raw = unwrap_model(model)
     speaker_aux_loss = zero
     if need_hidden and hasattr(raw, "predict_speaker"):
