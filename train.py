@@ -16,11 +16,8 @@ from accelerate.utils import set_seed
 from transformers import get_cosine_schedule_with_warmup
 from torchao.float8 import Float8LinearConfig, convert_to_float8_training
 
-from dataset import (
-    build_tts_dataloader,
-    extract_speaker_embs_from_batch,
-    load_titanet,
-)
+from dataset import build_tts_dataloader, extract_speaker_embs_from_batch, load_titanet
+
 from discriminator import ConformerDiscirminator
 from model_transformer import load_config, model_from_config
 
@@ -142,12 +139,7 @@ def extract_disc_features(
     disc_t=None,
     disc_noise=None,
 ):
-    """Stack hidden states from the score net as discriminator input.
 
-    When disc_t/disc_noise are given the latents are noised to that level
-    first, so the discriminator sees noisy representations instead of
-    requiring ODE-sampled sequences.
-    """
     max_len = int(latent_lengths.max().item())
     latents = latents[:, :max_len, :]
     valid_mask = torch.arange(max_len, device=latents.device)[None, :] < latent_lengths[:, None]
@@ -253,12 +245,10 @@ def compute_loss(
     cond = cond * valid_audio_mask.unsqueeze(-1).to(cond.dtype)
     model_input = x_t * valid_audio_mask.unsqueeze(-1).to(x_t.dtype)
 
-    # Mutually exclusive CFG drop buckets. Marginals:
-    #   P(text dropped)    = p_drop_both + p_drop_text
-    #   P(speaker dropped) = p_drop_both + p_drop_speaker
+
     p_drop_both = 0.1
     p_drop_text = 0.1
-    p_drop_speaker = 0.0  # raise in stage 2
+    p_drop_speaker = 0.0  # legacy, don't mind it
 
     r = torch.rand(B, device=device)
     b0 = p_drop_both
@@ -308,7 +298,7 @@ def compute_loss(
         stats = {"fm_loss": fm_loss.detach(), "gen_adv_loss": zero, "speaker_aux_loss": zero}
         return fm_loss, stats, None
 
-    # --- speaker auxiliary prediction ---
+
     raw = unwrap_model(model)
     speaker_aux_loss = zero
     if need_hidden and hasattr(raw, "predict_speaker"):
@@ -322,13 +312,12 @@ def compute_loss(
 
     total_loss = fm_loss + speaker_aux_weight * speaker_aux_loss
 
-    # --- adversarial ---
     gen_adv_loss = zero
     disc_cache = None
     if use_adversarial and discriminator is not None and adv_lambda > 0.0:
         latent_lengths = valid_audio_mask.sum(dim=1).long()
 
-        # single-step fake generation
+
         x0_gen = torch.randn_like(x1)
         t_gen = torch.rand(B, device=device, dtype=dtype)
         t_gen_exp = t_gen[:, None, None]
@@ -427,7 +416,7 @@ def load_checkpoint(accelerator, model, ema, exp_dir, tag, drop_optimizer_state=
     extra = torch.load(os.path.join(ckpt_dir, "extra_state.pt"),
                        map_location="cpu", weights_only=True)
 
-    # strict=False so a stage1 -> stage2 EMA shape change doesn't hard-fail
+
     ema.load_state_dict(extra["ema"], strict=False)
     ema.to(accelerator.device)
 
