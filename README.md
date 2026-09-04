@@ -76,8 +76,8 @@ The second stage and its adversarial training are both optional. I never enabled
 
 **Multispeaker outside English isn't robust yet.** That's a data distribution problem, and I will fix it at some point.
 
-note: 
-Persian is really the bane of my existence. the script and the absence of a good ASR model both work against you. I developed a transliteration pipeline with real human annotated data over the past few months, so Darya works with Finglish, and I've provided a model that converts Persian text to its transliteration. <br> It isn't bulletproof, but it gives you full control over generation, and with correct Finglish input, pronunciation should be near flawless.
+ 
+P.S: Persian is really the bane of my existence. its script and the absence of a good ASR model makes everything orders of magnitude more challenging. I managed to develop a transliteration pipeline with real human annotated data over the past few months, so Darya works with Finglish, and I've provided a model that converts Persian text to its transliteration. <br> It isn't bulletproof, but it gives you full control over generation, and with correct Finglish input, pronunciation should be near flawless.
 
 ---
 
