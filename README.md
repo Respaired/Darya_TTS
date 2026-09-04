@@ -12,8 +12,7 @@ tags:
 - russian
 ---
 
-<center><h1>Darya</h1></center>
-<center><h3>The Poor man's TTS.</h3></center>
+<center><h1>The Poor man's TTS</h1></center>
 
 | | |
 |---|---|
@@ -29,10 +28,11 @@ Start with the [inference notebook](https://huggingface.co/Respair/Darya_TTS/blo
 
 ## What it does
 
-- **Fast on CPU**, even at 1B, thanks in part to a few inference-side tricks.
+- **Fast on CPU**, even at 1B, thanks in part to a few inference-side tricks and its efficient speech tokenizer.
 - **Style conditioning** alongside the usual audio prompting path. This frees the whole context window for your input text, and makes prompting language-agnostic.
+- **Prompt mixing** by mixing speaker vectors you can create new speaker attributes.
 - **Speech editing.**
-- **Multispeaker generation** via control tags (`<S1>`, `<S2>`), disfluencies (`uh`, `umm`), and non-speech sounds through supported emojis.
+- **Multispeaker generation** via control tags (`<S1>`, `<S2>` etc.), disfluencies (`uh`, `umm`), and non-speech sounds through supported emojis.
 - **Phoneme-level Persian, Tajik and Russian support.**
 - **Cheap and easy to train.**
 
