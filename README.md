@@ -62,9 +62,9 @@ accelerate launch --mixed_precision bf16 train.py \
 
 The second stage and its adversarial training are both optional. I never enabled the discriminator myself , too expensive to be worth it.
 
-**Training details:** a single H100, batch size 112, cosine schedule, roughly 400k steps over about a week of actual compute. It wasn't one smooth run; I was trying things out, retraining and tweaking checkpoints to learn and unlearn various behaviours along the way. Some of that history is probably baked into what's uploaded here.
+**Training details:** a single H100, effective batch size of 288, cosine schedule, roughly 400k steps over about a week of actual training. It wasn't one smooth run; I was trying things out, retraining and tweaking checkpoints to learn and unlearn various behaviours along the way. Some of that history is probably baked into what's uploaded here.
 
-## Limitations and tips
+## Limitations / Notes
 
 **Sequence length.** A regular audio prompt uses the infilling path, so it lives in the same sequence as your output. The model was trained on 30s chunks, which means prompt length plus output length has to fit inside that budget. TitaNet speaker latents don't have this constraint, but speaker similarity won't be as strong.
 
