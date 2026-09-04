@@ -44,7 +44,7 @@ The goal of this project was to see if I could develop the fastest modern speech
 
 - Speed:
 
-At 16 steps, Darya reaches an RTF of ~0.05 on a high-end server CPU (Arm Neoverse V2 or similar), or ~0.5 on an i7-12700H laptop. Dropping to 8 steps gets you ~0.25 on the 12700H, though that's pushing it, the model isn't distilled.
+At 16 steps, Darya reaches an RTF of ~0.05-0.09 on a high-end server CPU (Arm Neoverse V2 or similar), or ~0.5 on an i7-12700H laptop. Dropping to 8 steps gets you ~0.25 on the 12700H, though that's pushing it, the model isn't distilled.
 (I personally prefer 32 steps.)
 
 I have already tested everything on RTX 5090, 3090, 3070, V100 and H100. your mileage will vary with hardware, but I think everything included here to increase efficieny is proven to work.
