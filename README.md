@@ -12,9 +12,8 @@ tags:
 - russian
 ---
 
-# Darya
-
-**A 1B TTS that runs reasonably fast on your laptop's CPU.**
+<center><h1>Darya</h1></center>
+<center><h3>The Poor man's TTS.</h3></center>
 
 | | |
 |---|---|
