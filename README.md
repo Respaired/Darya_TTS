@@ -40,7 +40,7 @@ Start with the [inference notebook](https://huggingface.co/Respair/Darya_TTS/blo
 
 At 16 steps, Darya reaches an RTF of ~0.05 on a high-end server CPU (Arm Neoverse V2 or similar), or ~0.5 on an i7-12700H laptop. Dropping to 8 steps gets you ~0.25 on the 12700H, though that's pushing it, the model isn't distilled.
 
-Tested on RTX 5090, 3090 and H100. Your mileage will vary with hardware, but everything included here earns its place.
+I have already tested everything on RTX 5090, 3090, 3070, V100 and H100. Your mileage will vary with hardware, but I think everything included here to increase efficieny is proven to work.
 
 The goal of the project was the fastest modern speech synthesizer possible on a limited budget, without shrinking the model to get there. Investing in a good 12.5 Hz tokenizer is part of what made that work. (1B was chosen because I had the headroom; on cheaper GPUs, 500M makes more sense.)
 
