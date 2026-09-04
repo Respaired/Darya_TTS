@@ -46,7 +46,7 @@ The goal of the project was the fastest modern speech synthesizer possible on a 
 
 ## Languages
 
-The focus this time was **Persian** and **Tajik**, with some **Russian**. **English** is supported and trained on substantial data, but given the landscape of available good English TTS models, it may be the least interesting part.
+The focus this time was **Persian** and **Tajik**, with some **Russian** (best effort). **English** is also supported.
 
 ## Training
 
