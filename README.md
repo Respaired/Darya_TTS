@@ -18,7 +18,7 @@ tags:
 |---|---|
 | Architecture | Rectified-flow encoder/decoder transformer, 1B params |
 | Objective | Spanned mask (infilling) |
-| Tokenizer | FSQ latents @ 12.5 Hz |
+| Speech Tokenizer | FSQ latents @ 12.5 Hz |
 | Max sequence | 30s (prompt + output combined) |
 | Languages | English, Persian (+Tajik), Russian |
 
