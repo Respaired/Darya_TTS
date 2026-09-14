@@ -22,6 +22,9 @@ tags:
 | Max sequence | 30s (prompt + output combined) |
 | Languages | English, Persian (+Tajik), Russian |
 
+## TL;DR
+Darya is a fast natural speech generation network that can be trained cheaply and you don't have to compromise too much on the parameter counts.
+
 ## Inference
 
 Start with the [inference notebook](https://huggingface.co/Respair/Darya_TTS/blob/main/inference_notebook.ipynb).
@@ -34,13 +37,13 @@ Start with the [inference notebook](https://huggingface.co/Respair/Darya_TTS/blo
 - **Speech editing.**
 - **Multispeaker generation** via control tags (`<S1>`, `<S2>` etc.), disfluencies (`uh`, `umm`), and non-speech sounds through supported emojis.
 - **Phoneme-level Persian, Tajik and Russian support.**
+- **Possibly the largest Zero-shot Persian model out there**
 - **Cheap and easy to train.**
 
 ## Details
 
 The goal of this project was to see if I could develop the fastest modern speech synthesizer possible on a limited budget, without compromising on the model size. <br> 
-1B was chosen because I had the headroom; on cheaper GPUs, ~500M makes more sense.
-
+1B was chosen because I had the headroom.
 
 - Speed:
 
@@ -77,17 +80,21 @@ but beware that this may cost you a big chunk of the efficiency gains that Darya
 
 **Sequence length.** A regular audio prompt uses the infilling path, so it lives in the same sequence as your output. The model was trained on 30s chunks, which means prompt length plus output length has to fit inside that budget. TitaNet speaker latents don't have this constraint, but speaker similarity won't be as strong.
 
-**Prosody depends on the length prior.** Pronunciation errors do too. There's no clean answer here: either you train the model to predict pads and silence and pay the overhead, or you lean on heuristics and length predictors that are sometimes sub-optimal. Your best available control is punctuation , use it liberally.
+**Prosody depends on the length prior.** Pronunciation errors do too. There's no clean answer here: either you train the model to predict pads and silence and pay the overhead, or you lean on heuristics and length predictors that are sometimes sub-optimal. Your best available control is punctuation.
 
-**Audio prompts are optional but recommended.** Darya has a full text encoder and learns alignment implicitly, so it will generate without a prompt. But it was trained on the spanned mask objective, which is the best objective we currently have for voice similarity, so it does better with one.
+**Audio prompts are optional but recommended.** Darya has a full text encoder and learns alignment implicitly, so it will generate without a prompt. But it was trained on the spanned mask objective, which is the best thing we currently have for voice similarity, so it works better with one.
 
-**Persian compounds.** Morakkab words (نرم افزار, آب جوش) and missing ezafe can come out wrong. in that case please try fixing the Finglish, add or remove spaces  and regenerate with a different seed. You are guaranteed to get what you want, just maybe not on the first try.
+**Persian compounds.** Morakkab words (نرم افزار, آب جوش) and missing ezafe can come out wrong with the Finglishizer. in that case please try fixing the Finglish, add or remove spaces  and regenerate with a different seed. You are guaranteed to get what you want, just maybe not on the first try.
 
 **Multispeaker outside English isn't robust yet.** That's a data distribution problem, and I will fix it at some point.
 
+**Parameter size** 1B is what I went with, but if you decided to train from scratch, something around 500m makes sense. it's more aligned with consumer grade gpus. 
  
-P.S: Persian is really the bane of my existence. its script and the absence of a good ASR model makes everything orders of magnitude more challenging. I managed to develop a transliteration pipeline with real human annotated data over the past few months, so Darya works with Finglish, and I've provided a model that converts Persian text to its transliteration. <br> It isn't bulletproof, but it gives you full control over generation, and with correct Finglish input, pronunciation should be near flawless.
+P.S: Persian (like Arabic or hebrew) have a type of writing system that is the least compatible with speech synthesize. I developed and self-funded a transliteration pipeline with real human annotated data over the past 2 years, so Darya works with Finglish, and I've provided a model that converts Persian text to its transliteration. <br> It isn't bulletproof, but it gives you full control over generation, and with correct Finglish input, pronunciation should be near flawless.
 
 ---
 
-I hope it's useful. Let me know if you have questions.
+I hope it's useful. Let me know if you have questions (preferably on X / twitter or email)
+
+Specal thanks to my good friend [Muhtasham](https://huggingface.co/muhtasham) for his financial support and his work on Tajik. <br>
+and also [Mahdi](https://huggingface.co/Mahdimef) and [Amir](https://huggingface.co/eapakJR) for their help.
