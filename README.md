@@ -59,6 +59,13 @@ make sure to compile your model with max-autotune-no-cudagraphs.
 
 The focus this time was **Persian** and **Tajik**, with some **Russian** (best effort). **English** is also supported.
 
+| | |
+|---|---|
+| English | 22,000+ hours |
+| Persian (+Tajik) | 14,000 hours |
+| Russian | 3,500 hours |
+| Other languages | 12,000 hours — used for similarity robustness; not directly usable |
+
 ## Training
 
 You need a dataset with pre-extracted Dune FSQ latents and text labels, plus any tokenizer `AutoTokenizer` can load , so two columns, `latents` and `text`. For the second stage, add an `audio` column, since TitaNet needs something to extract speaker latents from.
