@@ -29,6 +29,8 @@ Darya is a fast natural speech generation network that can be trained cheaply an
 
 Start with the [inference notebook](https://huggingface.co/Respair/Darya_TTS/blob/main/inference_notebook.ipynb).
 
+or the [gradio space](https://huggingface.co/spaces/Respair/Darya) - the denoiser is quantized to 8 bit, which causes degradation.
+
 ## What it does
 
 - **Fast on CPU**, even at 1B, thanks in part to a few inference-side tricks and its efficient speech tokenizer.
@@ -89,7 +91,9 @@ but beware that this may cost you a big chunk of the efficiency gains that Darya
 **Multispeaker outside English isn't robust yet.** That's a data distribution problem, and I will fix it at some point.
 
 **Parameter size** 1B is what I went with, but if you decided to train from scratch, something around 500m makes sense. it's more aligned with consumer grade gpus. 
- 
+
+
+
 P.S: Persian (like Arabic or hebrew) have a type of writing system that is the least compatible with speech synthesize. I developed and self-funded a transliteration pipeline with real human annotated data over the past 2 years, so Darya works with Finglish, and I've provided a model that converts Persian text to its transliteration. <br> It isn't bulletproof, but it gives you full control over generation, and with correct Finglish input, pronunciation should be near flawless.
 
 ---
