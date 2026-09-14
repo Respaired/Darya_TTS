@@ -102,7 +102,7 @@ but beware that this may cost you a big chunk of the efficiency gains that Darya
 
 ## License
 
-OpenRAIL++-M with non-commercial and use-based restrictions — see
+OpenRAIL++-M with non-commercial and use-based restrictions. see
 [LICENSE.md](https://huggingface.co/Respair/Darya_TTS/blob/main/LICENSE.md).
 
 **Warning.** This model can synthesize speech resembling real people.
