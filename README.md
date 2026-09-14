@@ -1,5 +1,5 @@
 ---
-license: cc-by-nc-sa-4.0
+license: openrail++
 language:
 - fa
 - ru
@@ -100,12 +100,20 @@ but beware that this may cost you a big chunk of the efficiency gains that Darya
 **Parameter size** 1B is what I went with, but if you decided to train from scratch, something around 500m makes sense. it's more aligned with consumer grade gpus. 
 
 
+## License
 
-P.S: Persian (like Arabic or hebrew) have a type of writing system that is the least compatible with speech generation. I developed and self-funded a transliteration pipeline with real human annotated data over the past 2 years, so Darya works with Finglish, and I've provided a model that converts Persian text to its transliteration. <br> It isn't bulletproof, but it gives you full control over generation, and with correct Finglish input, pronunciation should be near flawless.
+OpenRAIL++-M with non-commercial and use-based restrictions — see
+[LICENSE.md](https://huggingface.co/Respair/Darya_TTS/blob/main/LICENSE.md).
+
+**Warning.** This model can synthesize speech resembling real people.
+Please do not use it to commit fraud, impersonate anyone deceptively, or pass
+synthetic audio off as a genuine recording. You
+are solely responsible for what you generate and for obtaining any
+rights you need. Provided "as is," with no warranty and no liability
+on the author's part.
 
 ---
-
-I hope it's useful. Let me know if you have questions (preferably on X / twitter or email)
+I hope this work proves to be useful to you. Let me know if you have questions (preferably on X / twitter or email)
 
 Specal thanks to my good friend [Muhtasham](https://huggingface.co/muhtasham) for his financial support and his work on Tajik. <br>
 and also [Mahdi](https://huggingface.co/Mahdimef) and [Amir](https://huggingface.co/eapakJR) for their help; [Den4ik](https://github.com/Den4ikAI) for `ruaccent`.
