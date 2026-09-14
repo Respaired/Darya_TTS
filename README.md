@@ -101,7 +101,7 @@ but beware that this may cost you a big chunk of the efficiency gains that Darya
 
 
 
-P.S: Persian (like Arabic or hebrew) have a type of writing system that is the least compatible with speech synthesize. I developed and self-funded a transliteration pipeline with real human annotated data over the past 2 years, so Darya works with Finglish, and I've provided a model that converts Persian text to its transliteration. <br> It isn't bulletproof, but it gives you full control over generation, and with correct Finglish input, pronunciation should be near flawless.
+P.S: Persian (like Arabic or hebrew) have a type of writing system that is the least compatible with speech generation. I developed and self-funded a transliteration pipeline with real human annotated data over the past 2 years, so Darya works with Finglish, and I've provided a model that converts Persian text to its transliteration. <br> It isn't bulletproof, but it gives you full control over generation, and with correct Finglish input, pronunciation should be near flawless.
 
 ---
 
