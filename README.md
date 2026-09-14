@@ -64,7 +64,7 @@ The focus this time was **Persian** and **Tajik**, with some **Russian** (best e
 | English | 22,000+ hours |
 | Persian (+Tajik) | 14,000 hours |
 | Russian | 3,500 hours |
-| Other languages | 12,000 hours — used for similarity robustness; not directly usable |
+| Other languages | 12,000 hours — used for robustness; not directly usable |
 
 ## Training
 
