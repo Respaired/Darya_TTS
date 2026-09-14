@@ -23,7 +23,7 @@ tags:
 | Languages | English, Persian (+Tajik), Russian |
 
 ## TL;DR
-Darya is a fast natural speech generation network that can be trained cheaply and you don't have to compromise too much on the parameter counts.
+Darya is a fat, but fast speech generation neural net that can be trained cheaply and easily and you don't have to compromise much on its capacity.
 
 ## Inference
 
