@@ -108,4 +108,4 @@ P.S: Persian (like Arabic or hebrew) have a type of writing system that is the l
 I hope it's useful. Let me know if you have questions (preferably on X / twitter or email)
 
 Specal thanks to my good friend [Muhtasham](https://huggingface.co/muhtasham) for his financial support and his work on Tajik. <br>
-and also [Mahdi](https://huggingface.co/Mahdimef) and [Amir](https://huggingface.co/eapakJR) for their help.
+and also [Mahdi](https://huggingface.co/Mahdimef) and [Amir](https://huggingface.co/eapakJR) for their help; [Den4ik](https://github.com/Den4ikAI) for `ruaccent`.
