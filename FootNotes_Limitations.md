@@ -1,3 +1,25 @@
+## Details
+
+The goal of this project was to see if I could develop the fastest modern speech synthesizer possible (especially on cpu) on a limited budget, without compromising on the model size. <br> 
+
+
+- Speed:
+
+At 16 steps, Darya reaches an RTF of ~0.05-0.09 on a high-end server CPU (Arm Neoverse V2 or similar), or ~0.5 on an i7-12700H laptop. Dropping to 8 steps gets you ~0.25 on the 12700H, though that's pushing it, the model isn't distilled.
+
+I have already tested everything on RTX 5090, 3090, 3070, V100 and H100. your mileage will vary with hardware, but I think everything included here to increase efficieny is proven to work.
+make sure to compile your model with max-autotune-no-cudagraphs.
+
+
+The focus this time was **Persian** and **Tajik**, with some **Russian** (best effort). **English** is also supported.
+
+| | |
+|---|---|
+| English | 22,000+ hours |
+| Persian (+Tajik) | 14,000 hours |
+| Russian | 3,500 hours |
+| Other languages | 12,000 hours — used for robustness; not directly usable |
+
 ## Notes and some Limitations
 
 **Sequence length.** A regular audio prompt uses the infilling path, so it lives in the same sequence as your output. The model was trained on 30s chunks, which means prompt length plus output length has to fit inside that budget. TitaNet speaker latents don't have this constraint, but speaker similarity won't be as strong.
