@@ -16,10 +16,10 @@ tags:
 
 | | |
 |---|---|
-| Architecture | Rectified-flow encoder/decoder transformer, 1B params |
+| Architecture | Rectified-flow encoder/decoder transformer |
 | Objective | Spanned mask (infilling) |
 | Audio shape | FSQ latents @ 12.5 Hz - 44.1khz |
-| Max sequence | 30s (prompt + output combined) |
+| Size | 1B params |
 | Languages | English, Persian (+Tajik), Russian |
 
 ## TL;DR
