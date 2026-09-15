@@ -101,6 +101,8 @@ but beware that this may cost you a big chunk of the efficiency gains that this 
 **Parameter size** 1B is what I went with, but if you decided to train from scratch, something around 500m makes sense. it's more aligned with consumer grade gpus. 
 
 
+one last note: The provided checkpoints are not trained in one smooth run as i was trying various things. so it may not be optimal for your use case. treat it as a proof of concept.
+
 ## License
 
 OpenRAIL++-M with non-commercial and use-based restrictions. see
