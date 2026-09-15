@@ -1659,3 +1659,386 @@ class Extractor:
             raise ValueError(f"Unexpected speaker embedding shape: {tuple(emb.shape)}")
 
         return emb
+
+# =====================================================================
+# Plain reducio samplers
+#
+# Same trajectory as the samplers above, with nothing between the model
+# and the step: ordinary CFG only, applied at every timestep, no APG and
+# no CFG window. Guidance cannot vary over the trajectory here, so the
+# reuse conditions collapse to the ones in the torch reference sampler.
+# =====================================================================
+
+
+def sample_euler_reducio_onnx_plain(
+    core,
+    text_ids,
+    text_mask,
+    latent_size,
+    duration,
+    cond_latents=None,
+    cond_latent_mask=None,
+    steps=32,
+    cfg=2.0,
+    seed=None,
+    ts_fraction=0.2,
+    bs_fraction=0.2,
+    torch_output_device="cpu",
+):
+    data = prepare_onnx_sampling_inputs(
+        text_ids=text_ids,
+        text_mask=text_mask,
+        latent_size=latent_size,
+        duration=duration,
+        cond_latents=cond_latents,
+        cond_latent_mask=cond_latent_mask,
+    )
+
+    text_ids_np = data["text_ids"]
+    text_mask_np = data["text_mask"]
+    valid = data["valid"]
+    cond = data["cond"]
+    cond_mask = data["cond_mask"]
+    span_mask = data["span_mask"]
+
+    b, t_total, d = cond.shape
+    _require_batch_size_one(b, "sample_euler_reducio_onnx_plain")
+
+    context, context_mask = core.encode(
+        text_ids_np,
+        text_mask_np,
+        text_cond_drop=np.zeros((b,), dtype=np.bool_),
+    )
+    null_context_mask = np.zeros_like(context_mask, dtype=np.bool_)
+
+    if seed is not None:
+        gen = torch.Generator(device="cpu")
+        gen.manual_seed(int(seed))
+    else:
+        gen = None
+
+    x = torch.randn((b, t_total, d), generator=gen, dtype=torch.float32).numpy()
+    x = x * valid[:, :, None].astype(np.float32)
+
+    steps = int(steps)
+    use_cfg = float(cfg) > 0.0
+
+    n_ts = int(steps * ts_fraction)
+    n_bs = int(steps * bs_fraction)
+    ts_start = steps - n_ts
+    bs_start = ts_start - n_bs
+
+    prev_v = None
+    prev_v_cond = None
+    prev_v_null = None
+
+    times = np.linspace(0.0, 1.0, steps + 1, dtype=np.float32)
+
+    def velocity(x, t, branch_context_mask):
+        return core.decode_velocity(
+            x=x,
+            t=t,
+            context=context,
+            context_mask=branch_context_mask,
+            latent_mask=valid,
+            span_mask=span_mask,
+            valid_audio_mask=valid,
+            cond=cond,
+        ).astype(np.float32)
+
+    for i in range(steps):
+        t = np.full((b,), float(times[i]), dtype=np.float32)
+        dt = np.float32(times[i + 1] - times[i])
+
+        if i >= ts_start and prev_v is not None:
+            v = prev_v
+        else:
+            v_cond = velocity(x, t, context_mask)
+
+            if use_cfg:
+                if (
+                    i >= bs_start
+                    and i < ts_start
+                    and prev_v_cond is not None
+                    and prev_v_null is not None
+                ):
+                    v_null = prev_v_null - prev_v_cond + v_cond
+                else:
+                    v_null = velocity(x, t, null_context_mask)
+
+                v = v_cond + np.float32(cfg) * (v_cond - v_null)
+                prev_v_cond = v_cond
+                prev_v_null = v_null
+            else:
+                v = v_cond
+
+            prev_v = v.astype(np.float32)
+
+        x = (x + dt * v) * valid[:, :, None].astype(np.float32)
+        x = np.where(cond_mask[:, :, None], cond, x).astype(np.float32)
+
+    x = np.where(cond_mask[:, :, None], cond, x).astype(np.float32)
+    return torch.from_numpy(x).to(torch_output_device)
+
+
+def sample_euler_reducio_onnx_spk_plain(
+    core,
+    text_ids,
+    text_mask,
+    latent_size,
+    duration,
+    cond_latents=None,
+    cond_latent_mask=None,
+    *,
+    speaker_emb=None,
+    speaker_adaln_scale=1.0,
+    steps=32,
+    cfg=2.0,
+    speaker_cfg=None,
+    seed=None,
+    ts_fraction=0.2,
+    bs_fraction=0.2,
+    torch_output_device="cpu",
+):
+    if speaker_cfg is None:
+        speaker_cfg = 0.0
+
+    data = prepare_onnx_sampling_inputs(
+        text_ids=text_ids,
+        text_mask=text_mask,
+        latent_size=latent_size,
+        duration=duration,
+        cond_latents=cond_latents,
+        cond_latent_mask=cond_latent_mask,
+    )
+
+    text_ids_np = data["text_ids"]
+    text_mask_np = data["text_mask"]
+    valid = data["valid"]
+    cond = data["cond"]
+    cond_mask = data["cond_mask"]
+    span_mask = data["span_mask"]
+
+    b, t_total, d = cond.shape
+    _require_batch_size_one(b, "sample_euler_reducio_onnx_spk_plain")
+
+    speaker_emb_np = None
+    if speaker_emb is not None:
+        speaker_emb_np = as_numpy(speaker_emb).astype(np.float32)
+        if speaker_emb_np.ndim == 1:
+            speaker_emb_np = speaker_emb_np[None, :]
+        if speaker_emb_np.ndim != 2:
+            raise ValueError(
+                f"expected speaker_emb [D_spk] or [1, D_spk], got {tuple(speaker_emb_np.shape)}"
+            )
+        if speaker_emb_np.shape[0] != 1:
+            raise ValueError(
+                "ONNX sampler is single-sample only; "
+                f"expected speaker_emb batch 1, got {speaker_emb_np.shape[0]}"
+            )
+
+    use_dual_cfg = float(speaker_cfg) > 0.0 and speaker_emb_np is not None
+    use_cfg = float(cfg) > 0.0 or use_dual_cfg
+
+    context, context_mask = core.encode(
+        text_ids_np,
+        text_mask_np,
+        text_cond_drop=np.zeros((b,), dtype=np.bool_),
+    )
+    null_context_mask = np.zeros_like(context_mask, dtype=np.bool_)
+    speaker_drop_mask = np.ones((b,), dtype=np.bool_)
+
+    if seed is not None:
+        gen = torch.Generator(device="cpu")
+        gen.manual_seed(int(seed))
+    else:
+        gen = None
+
+    x = torch.randn((b, t_total, d), generator=gen, dtype=torch.float32).numpy()
+    x = x * valid[:, :, None].astype(np.float32)
+
+    steps = int(steps)
+    n_ts = int(steps * ts_fraction)
+    n_bs = int(steps * bs_fraction)
+    ts_start = steps - n_ts
+    bs_start = ts_start - n_bs
+
+    prev_v = None
+    prev_v_full = None
+    prev_v_text = None
+    prev_v_null = None
+
+    times = np.linspace(0.0, 1.0, steps + 1, dtype=np.float32)
+
+    def velocity(x, t, branch_context_mask, speaker_cond_drop):
+        return core.decode_velocity(
+            x=x,
+            t=t,
+            context=context,
+            context_mask=branch_context_mask,
+            latent_mask=valid,
+            span_mask=span_mask,
+            valid_audio_mask=valid,
+            cond=cond,
+            speaker_emb=speaker_emb_np,
+            speaker_cond_drop=speaker_cond_drop,
+            speaker_adaln_scale=np.asarray(speaker_adaln_scale, dtype=np.float32),
+        ).astype(np.float32)
+
+    for i in range(steps):
+        t = np.full((b,), float(times[i]), dtype=np.float32)
+        dt = np.float32(times[i + 1] - times[i])
+        reuse_branch = i >= bs_start and i < ts_start
+
+        if i >= ts_start and prev_v is not None:
+            v = prev_v
+        else:
+            v_full = velocity(x, t, context_mask, None)
+
+            if use_dual_cfg:
+                if reuse_branch and prev_v_full is not None and prev_v_text is not None:
+                    v_text = prev_v_text - prev_v_full + v_full
+                else:
+                    v_text = velocity(x, t, context_mask, speaker_drop_mask)
+
+                if reuse_branch and prev_v_full is not None and prev_v_null is not None:
+                    v_null = prev_v_null - prev_v_full + v_full
+                else:
+                    v_null = velocity(x, t, null_context_mask, speaker_drop_mask)
+
+                v = (
+                    v_full
+                    + np.float32(cfg) * (v_text - v_null)
+                    + np.float32(speaker_cfg) * (v_full - v_text)
+                ).astype(np.float32)
+                prev_v_text = v_text
+                prev_v_null = v_null
+            elif use_cfg:
+                if reuse_branch and prev_v_full is not None and prev_v_null is not None:
+                    v_null = prev_v_null - prev_v_full + v_full
+                else:
+                    v_null = velocity(x, t, null_context_mask, speaker_drop_mask)
+
+                v = v_full + np.float32(cfg) * (v_full - v_null)
+                prev_v_null = v_null
+            else:
+                v = v_full
+
+            prev_v_full = v_full
+            prev_v = v.astype(np.float32)
+
+        x = (x + dt * v) * valid[:, :, None].astype(np.float32)
+        x = np.where(cond_mask[:, :, None], cond, x).astype(np.float32)
+
+    x = np.where(cond_mask[:, :, None], cond, x).astype(np.float32)
+    return torch.from_numpy(x).to(torch_output_device)
+
+
+def sample_euler_reducio_edit_onnx_plain(
+    core,
+    text_ids,
+    text_mask,
+    *,
+    cond,
+    keep_mask,
+    valid_mask=None,
+    steps=32,
+    cfg=2.0,
+    seed=None,
+    ts_fraction=0.2,
+    bs_fraction=0.2,
+    torch_output_device="cpu",
+):
+    data = prepare_onnx_edit_sampling_inputs(
+        text_ids=text_ids,
+        text_mask=text_mask,
+        cond=cond,
+        keep_mask=keep_mask,
+        valid_mask=valid_mask,
+    )
+
+    text_ids_np = data["text_ids"]
+    text_mask_np = data["text_mask"]
+    valid = data["valid"]
+    cond = data["cond"]
+    cond_mask = data["cond_mask"]
+    span_mask = data["span_mask"]
+
+    b, t_total, d = cond.shape
+    _require_batch_size_one(b, "sample_euler_reducio_edit_onnx_plain")
+
+    context, context_mask = core.encode(
+        text_ids_np,
+        text_mask_np,
+        text_cond_drop=np.zeros((b,), dtype=np.bool_),
+    )
+    null_context_mask = np.zeros_like(context_mask, dtype=np.bool_)
+
+    gen = torch.Generator(device="cpu")
+    if seed is not None:
+        gen.manual_seed(int(seed))
+
+    x = torch.randn((b, t_total, d), generator=gen, dtype=torch.float32).numpy()
+    x = x * valid[:, :, None].astype(np.float32)
+
+    steps = int(steps)
+    use_cfg = float(cfg) > 0.0
+
+    n_ts = int(steps * ts_fraction)
+    n_bs = int(steps * bs_fraction)
+    ts_start = steps - n_ts
+    bs_start = ts_start - n_bs
+
+    prev_v = None
+    prev_v_cond = None
+    prev_v_null = None
+
+    times = np.linspace(0.0, 1.0, steps + 1, dtype=np.float32)
+
+    def velocity(x, t, branch_context_mask):
+        return core.decode_velocity(
+            x=x,
+            t=t,
+            context=context,
+            context_mask=branch_context_mask,
+            latent_mask=valid,
+            span_mask=span_mask,
+            valid_audio_mask=valid,
+            cond=cond,
+        ).astype(np.float32)
+
+    for i in range(steps):
+        t = np.full((b,), float(times[i]), dtype=np.float32)
+        dt = np.float32(times[i + 1] - times[i])
+
+        if i >= ts_start and prev_v is not None:
+            v = prev_v
+        else:
+            v_cond = velocity(x, t, context_mask)
+
+            if use_cfg:
+                if (
+                    i >= bs_start
+                    and i < ts_start
+                    and prev_v_cond is not None
+                    and prev_v_null is not None
+                ):
+                    v_null = prev_v_null - prev_v_cond + v_cond
+                else:
+                    v_null = velocity(x, t, null_context_mask)
+
+                v = v_cond + np.float32(cfg) * (v_cond - v_null)
+                prev_v_cond = v_cond
+                prev_v_null = v_null
+            else:
+                v = v_cond
+
+            prev_v = v.astype(np.float32)
+
+        x = (x + dt * v) * valid[:, :, None].astype(np.float32)
+        x = np.where(cond_mask[:, :, None], cond, x).astype(np.float32)
+
+    x = np.where(cond_mask[:, :, None], cond, x).astype(np.float32)
+    x = x * valid[:, :, None].astype(np.float32)
+
+    return torch.from_numpy(x).to(torch_output_device)
