@@ -7,7 +7,8 @@ At 16 steps, Darya reaches an RTF of ~0.05-0.09 on a high-end server CPU (Arm Ne
 I have already tested everything on RTX 5090, 3090, 3070, V100 and H100. your mileage will vary with hardware, but I think everything included here to increase efficieny is proven to work.
 make sure to compile your model with max-autotune-no-cudagraphs.
 
-
+- Coverage:
+- 
 The focus this time was **Persian** and **Tajik**, with some **Russian** (best effort). **English** is also supported.
 
 | | |
