@@ -68,7 +68,8 @@ The focus this time was **Persian** and **Tajik**, with some **Russian** (best e
 
 ## Training
 
-You need a dataset with pre-extracted Dune FSQ latents and text labels, plus any tokenizer `AutoTokenizer` can load , so two columns, `latents` and `text`. For the second stage, add an `audio` column, since TitaNet needs something to extract speaker latents from.
+You need a dataset with pre-extracted Dune FSQ latents and text, plus any tokenizer `AutoTokenizer` can load.
+first [extract the latents](https://huggingface.co/Respair/dune_codec/blob/main/dune_extraction.py) then train.
 
 ```bash
 accelerate launch --mixed_precision bf16 train.py \
@@ -78,10 +79,10 @@ accelerate launch --mixed_precision bf16 train.py \
     --tokenizer "your/tokenizer"
 ```
 
-The second stage and its adversarial training are both optional. I never enabled the discriminator myself , too expensive to be worth it.
+The second stage and its adversarial training are both optional. I never enabled the discriminator myself, too expensive to be worth it.
 
-If you found dune to be unfit for your data, you can easily switch to another codec. it's a matter of changing the dim (52) in the config.
-but beware that this may cost you a big chunk of the efficiency gains that Darya provides.
+If you want to use another codec, you can just change dim 52 to your target.
+but beware that this may cost you a big chunk of the efficiency gains that this model provides.
 
 **Training details:** a single H100, effective batch size of 288, cosine schedule, roughly 400k steps over about a week of actual training. It wasn't one smooth run; I was trying things out, retraining and tweaking checkpoints to learn and unlearn various behaviours along the way. Some of that history is probably baked into what's uploaded here.
 
