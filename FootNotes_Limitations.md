@@ -8,7 +8,7 @@ I have already tested everything on RTX 5090, 3090, 3070, V100 and H100. your mi
 make sure to compile your model with max-autotune-no-cudagraphs.
 
 - Coverage:
-- 
+
 The focus this time was **Persian** and **Tajik**, with some **Russian** (best effort). **English** is also supported.
 
 | | |
