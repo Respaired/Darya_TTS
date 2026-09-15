@@ -68,21 +68,9 @@ but beware that this may cost you a big chunk of the efficiency gains that this 
 
 
 ## License
-
-OpenRAIL++-M with non-commercial and use-based restrictions. see
-[LICENSE.md](https://huggingface.co/Respair/Darya_TTS/blob/main/LICENSE.md).
-
-**Warning.** This model can synthesize speech resembling real people.
-Please do not use it to commit fraud, impersonate anyone deceptively, or pass
-synthetic audio off as a genuine recording. You
-are solely responsible for what you generate and for obtaining any
-rights you need. Provided "as is," with no warranty and no liability
-on the author's part.
-
-Even without an audio prompt, the stochastic nature of such models means the output can randomly resemble a real person's voice. Any such resemblance is coincidental and unintended. Use at your own risk.
+see [LICENSE.md](https://huggingface.co/Respair/Darya_TTS/blob/main/LICENSE.md).
 
 ---
-
 I hope this work proves to be useful to you. Let me know if you have questions (preferably on X / twitter or email)
 
 Specal thanks to my good friend [Muhtasham](https://huggingface.co/muhtasham) for his financial support and his work on Tajik. <br>
