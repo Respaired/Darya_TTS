@@ -22,7 +22,7 @@ tags:
 | Size | 1B params |
 | Languages | English, Persian (+Tajik), Russian |
 
-## TL;DR
+## What is this?
 Darya is a fat, but fast speech generation neural net that can be trained cheaply, easily and you don't have to compromise much on its capacity.
 
 ## Inference
@@ -31,7 +31,7 @@ Start with the [inference notebook](https://huggingface.co/Respair/Darya_TTS/blo
 
 or the [gradio space](https://huggingface.co/spaces/Respair/Darya) - the denoiser is quantized to 8 bit, which causes degradation.
 
-## What it does
+## Features
 
 - **Fast on CPU**, even at 1B, thanks in part to a few inference-side tricks and its efficient speech tokenizer.
 - **Style conditioning** alongside the usual audio prompting path. This frees the whole context window for your input text, and makes prompting language-agnostic.
@@ -46,7 +46,7 @@ or the [gradio space](https://huggingface.co/spaces/Respair/Darya) - the denoise
 
 The goal of this project was to see if I could develop the fastest modern speech synthesizer possible (especially on cpu) on a limited budget, without compromising on the model size. <br> 
 
-for more details check [here](https://huggingface.co/Respair/Darya_TTS/blob/main/FootNotes_Limitations.md).
+for more details please check [here](https://huggingface.co/Respair/Darya_TTS/blob/main/FootNotes_Limitations.md).
 
 ## Training
 
@@ -82,6 +82,7 @@ on the author's part.
 Even without an audio prompt, the stochastic nature of such models means the output can randomly resemble a real person's voice. Any such resemblance is coincidental and unintended. Use at your own risk.
 
 ---
+
 I hope this work proves to be useful to you. Let me know if you have questions (preferably on X / twitter or email)
 
 Specal thanks to my good friend [Muhtasham](https://huggingface.co/muhtasham) for his financial support and his work on Tajik. <br>
