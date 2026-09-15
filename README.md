@@ -44,13 +44,12 @@ or the [gradio space](https://huggingface.co/spaces/Respair/Darya) - the denoise
 
 ## Details
 
-The goal of this project was to see if I could develop the fastest modern speech synthesizer possible on a limited budget, without compromising on the model size. <br> 
-1B was chosen because I had the headroom.
+The goal of this project was to see if I could develop the fastest modern speech synthesizer possible (especially on cpu) on a limited budget, without compromising on the model size. <br> 
+
 
 - Speed:
 
 At 16 steps, Darya reaches an RTF of ~0.05-0.09 on a high-end server CPU (Arm Neoverse V2 or similar), or ~0.5 on an i7-12700H laptop. Dropping to 8 steps gets you ~0.25 on the 12700H, though that's pushing it, the model isn't distilled.
-if you don't care about the minimum workable latency, 32 would be the sweet-spot.
 
 I have already tested everything on RTX 5090, 3090, 3070, V100 and H100. your mileage will vary with hardware, but I think everything included here to increase efficieny is proven to work.
 make sure to compile your model with max-autotune-no-cudagraphs.
