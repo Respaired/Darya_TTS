@@ -46,23 +46,7 @@ or the [gradio space](https://huggingface.co/spaces/Respair/Darya) - the denoise
 
 The goal of this project was to see if I could develop the fastest modern speech synthesizer possible (especially on cpu) on a limited budget, without compromising on the model size. <br> 
 
-
-- Speed:
-
-At 16 steps, Darya reaches an RTF of ~0.05-0.09 on a high-end server CPU (Arm Neoverse V2 or similar), or ~0.5 on an i7-12700H laptop. Dropping to 8 steps gets you ~0.25 on the 12700H, though that's pushing it, the model isn't distilled.
-
-I have already tested everything on RTX 5090, 3090, 3070, V100 and H100. your mileage will vary with hardware, but I think everything included here to increase efficieny is proven to work.
-make sure to compile your model with max-autotune-no-cudagraphs.
-
-
-The focus this time was **Persian** and **Tajik**, with some **Russian** (best effort). **English** is also supported.
-
-| | |
-|---|---|
-| English | 22,000+ hours |
-| Persian (+Tajik) | 14,000 hours |
-| Russian | 3,500 hours |
-| Other languages | 12,000 hours — used for robustness; not directly usable |
+for more details check [here](https://huggingface.co/Respair/Darya_TTS/blob/main/FootNotes_Limitations.md).
 
 ## Training
 
@@ -81,10 +65,6 @@ The second stage and its adversarial component are both optional. I never enable
 
 If you want to use another codec, you can just change dim 52 to your target.
 but beware that this may cost you a big chunk of the efficiency gains that this model offers.
-
-## Notes and some Limitations
-
-[written here](https://huggingface.co/Respair/Darya_TTS/blob/main/FootNotes_Limitations.md)
 
 
 ## License
