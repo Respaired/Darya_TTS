@@ -54,7 +54,6 @@ At 16 steps, Darya reaches an RTF of ~0.05-0.09 on a high-end server CPU (Arm Ne
 I have already tested everything on RTX 5090, 3090, 3070, V100 and H100. your mileage will vary with hardware, but I think everything included here to increase efficieny is proven to work.
 make sure to compile your model with max-autotune-no-cudagraphs.
 
- - Languages
 
 The focus this time was **Persian** and **Tajik**, with some **Russian** (best effort). **English** is also supported.
 
@@ -78,29 +77,15 @@ accelerate launch --mixed_precision bf16 train.py \
     --tokenizer "your/tokenizer"
 ```
 
-The second stage and its adversarial training are both optional. I never enabled the discriminator myself, too expensive to be worth it.
+The second stage and its adversarial component are both optional. I never enabled the discriminator myself, too expensive to be worth it.
 
 If you want to use another codec, you can just change dim 52 to your target.
-but beware that this may cost you a big chunk of the efficiency gains that this model provides.
-
-**Training details:** a single H100, effective batch size of 288, cosine schedule, roughly 400k steps over about a week of actual training. It wasn't one smooth run; I was trying things out, retraining and tweaking checkpoints to learn and unlearn various behaviours along the way. Some of that history is probably baked into what's uploaded here.
+but beware that this may cost you a big chunk of the efficiency gains that this model offers.
 
 ## Notes and some Limitations
 
-**Sequence length.** A regular audio prompt uses the infilling path, so it lives in the same sequence as your output. The model was trained on 30s chunks, which means prompt length plus output length has to fit inside that budget. TitaNet speaker latents don't have this constraint, but speaker similarity won't be as strong.
+[written here](https://huggingface.co/Respair/Darya_TTS/blob/main/FootNotes_Limitations.md)
 
-**Prosody depends on the length prior.** Pronunciation errors do too. There's no clean answer here: either you train the model to predict pads and silence and pay the overhead, or you lean on heuristics and length predictors that are sometimes sub-optimal. Your best available control is punctuation.
-
-**Audio prompts are optional but recommended.** Darya has a full text encoder and learns alignment implicitly, so it will generate without a prompt. But it was trained on the spanned mask objective, which is the best thing we currently have for voice similarity, so it works better with one.
-
-**Persian compounds.** Morakkab words (نرم افزار, آب جوش) and missing ezafe can come out wrong with the Finglishizer. in that case please try fixing the Finglish, add or remove spaces  and regenerate with a different seed. You are guaranteed to get what you want, just maybe not on the first try.
-
-**Multispeaker outside English isn't robust yet.** That's a data distribution problem, and I will fix it at some point.
-
-**Parameter size** 1B is what I went with, but if you decided to train from scratch, something around 500m makes sense. it's more aligned with consumer grade gpus. 
-
-
-one last note: The provided checkpoints are not trained in one smooth run as i was trying various things. so it may not be optimal for your use case. treat it as a proof of concept.
 
 ## License
 
