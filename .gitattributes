@@ -46,3 +46,4 @@ ckpt/onnx_ckpts/onnx_int8/_sanitized/tts_decoder_denoiser_fp32_sanitized.onnx.da
 ckpt/onnx_ckpts/onnx_int8/_sanitized/tts_encoder_fp32_sanitized.onnx.data filter=lfs diff=lfs merge=lfs -text
 ckpt/onnx_ckpts/onnx_int8/tts_decoder_denoiser_int8.onnx.data filter=lfs diff=lfs merge=lfs -text
 ckpt/onnx_ckpts/onnx_int8/tts_encoder_int8.onnx.data filter=lfs diff=lfs merge=lfs -text
+ckpt/onnx_ckpts/onnx_v2_fp32/tts_encoder_fp32.onnx.data filter=lfs diff=lfs merge=lfs -text
