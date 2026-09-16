@@ -11,15 +11,15 @@ tags:
 - speech
 - russian
 gated: true
-extra_gated_heading: "Access this TTS model"
+extra_gated_heading: "Access"
 extra_gated_description: "Access is granted automatically but please tell me a bit about yourself. "
 extra_gated_prompt: "By requesting access you agree to the license and its restrictions, including not using this model to impersonate any person without their consent or to generate deceptive audio."
 extra_gated_fields:
-  Full name: text
+  name: text
   Affiliation/Organization: text
   Country: country
   Contact email: text
-  I want to use this model for:
+  I want to use this for:
     type: select
     options:
       - Academic research
