@@ -22,8 +22,9 @@ tags:
 | Size | 1B params |
 | Languages | English, Persian (+Tajik), Russian |
 
-## What is this?
+## TL;DR
 Darya is a fat, but fast speech generation neural net that can be trained cheaply, easily and you don't have to compromise much on its capacity.
+
 
 ## Inference
 
