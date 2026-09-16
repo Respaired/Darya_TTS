@@ -10,27 +10,29 @@ tags:
 - tts
 - speech
 - russian
-gated: true
-extra_gated_heading: "Access"
-extra_gated_description: "Access is granted automatically but please tell me a bit about yourself. "
-extra_gated_prompt: "By requesting access you agree to the license and its restrictions, including not using this model to impersonate any person without their consent or to generate deceptive audio."
-extra_gated_fields:
-  name: text
-  Affiliation/Organization: text
-  Country: country
-  Contact email: text
-  I want to use this for:
-    type: select
-    options:
-      - Academic research
-      - Personal / hobby project
-      - Commercial product
-      - Accessibility / assistive tech
-      - label: Other
-        value: other
-  I agree to the OpenRAIL++ license and its use restrictions: checkbox
-  I will not use this model to clone or impersonate a voice without consent: checkbox
-extra_gated_button_content: "Agree and access repository"
+
+
+# gated: true
+# extra_gated_heading: "Access"
+# extra_gated_description: "Access is granted automatically but please tell me a bit about yourself. "
+# extra_gated_prompt: "By requesting access you agree to the license and its restrictions, including not using this model to impersonate any person without their consent or to generate deceptive audio."
+# extra_gated_fields:
+#   name: text
+#   Affiliation/Organization: text
+#   Country: country
+#   Contact email: text
+#   I want to use this for:
+#     type: select
+#     options:
+#       - Academic research
+#       - Personal / hobby project
+#       - Commercial product
+#       - Accessibility / assistive tech
+#       - label: Other
+#         value: other
+#   I agree to the OpenRAIL++ license and its use restrictions: checkbox
+#   I will not use this model to clone or impersonate a voice without consent: checkbox
+# extra_gated_button_content: "Agree and access repository"
 ---
 
 <center><h1>The Poor man's TTS</h1></center>
