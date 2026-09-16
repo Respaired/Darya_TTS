@@ -16,7 +16,7 @@ tags:
 
 | | |
 |---|---|
-| Architecture | Rectified-flow encoder/decoder transformer |
+| Architecture | Rectified-flow DiT |
 | Objective | Spanned mask (infilling) |
 | Audio shape | FSQ latents @ 12.5 Hz - 44.1khz |
 | Size | 1B params |
