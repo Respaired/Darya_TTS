@@ -39,7 +39,7 @@ tags:
 
 | | |
 |---|---|
-| Architecture | Rectified-flow DiT |
+| Architecture | Rectified-flow Enc/Dec DiT |
 | Objective | Spanned mask (infilling) |
 | Audio shape | FSQ latents @ 12.5 Hz - 44.1khz |
 | Size | 1B params |
