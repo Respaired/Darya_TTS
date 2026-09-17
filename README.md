@@ -64,7 +64,8 @@ or the [gradio space](https://huggingface.co/spaces/Respair/Darya) - the denoise
 - **Multispeaker generation** via control tags (`<S1>`, `<S2>` etc.), disfluencies (`uh`, `umm`), and non-speech sounds through supported emojis.
 - **Phoneme-level Persian, Tajik and Russian support.**
 - **Possibly the largest Zero-shot Persian model out there**
-- **Cheap and easy to train.**, can be trained on consumer grade GPUs or large amounts of data but doesn't require much compute to do so
+- **Cheap and easy to train.**, can be trained on consumer grade GPUs or large amounts of data but doesn't require much compute,
+    the best part is you don't need to cut its size to do that.
 
 ## Details
 
