@@ -1,17 +1,3 @@
----
-license: openrail++
-language:
-- fa
-- ru
-- en
-tags:
-- persian
-- english
-- tts
-- speech
-- russian
-
----
 
 <center><h1>The Poor man's TTS</h1></center>
 
