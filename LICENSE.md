@@ -14,7 +14,7 @@ restrictions that must be preserved under the OpenRAIL++-M license.
 
 ### Additional use restrictions
 
-You may not use the model or any derivative of the model:
+You may not use the model:
 
 - In any way that violates applicable law or regulation;
 - For commercial purposes, including use in or in support of any product,
