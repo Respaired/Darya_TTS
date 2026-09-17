@@ -11,28 +11,6 @@ tags:
 - speech
 - russian
 
-
-# gated: true
-# extra_gated_heading: "Access"
-# extra_gated_description: "Access is granted automatically but please tell me a bit about yourself. "
-# extra_gated_prompt: "By requesting access you agree to the license and its restrictions, including not using this model to impersonate any person without their consent or to generate deceptive audio."
-# extra_gated_fields:
-#   name: text
-#   Affiliation/Organization: text
-#   Country: country
-#   Contact email: text
-#   I want to use this for:
-#     type: select
-#     options:
-#       - Academic research
-#       - Personal / hobby project
-#       - Commercial product
-#       - Accessibility / assistive tech
-#       - label: Other
-#         value: other
-#   I agree to the OpenRAIL++ license and its use restrictions: checkbox
-#   I will not use this model to clone or impersonate a voice without consent: checkbox
-# extra_gated_button_content: "Agree and access repository"
 ---
 
 <center><h1>The Poor man's TTS</h1></center>
@@ -64,8 +42,7 @@ or the [gradio space](https://huggingface.co/spaces/Respair/Darya) - the denoise
 - **Multispeaker generation** via control tags (`<S1>`, `<S2>` etc.), disfluencies (`uh`, `umm`), and non-speech sounds through supported emojis.
 - **Phoneme-level Persian, Tajik and Russian support.**
 - **Possibly the largest Zero-shot Persian model out there**
-- **Cheap and easy to train.**, can be trained on consumer grade GPUs or large amounts of data but doesn't require much compute,
-    the best part is you don't need to cut its size to do that.
+- **Cheap and easy to train** can be trained on consumer grade GPUs without making it small
 
 ## Details
 
